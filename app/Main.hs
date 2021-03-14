@@ -14,13 +14,24 @@ data GameState = GameState {
     randomGen :: StdGen,
     nextBranches :: [Direction],
     curSide :: Direction,
-    player :: Picture 
+    active :: Bool,
+    playerLeft :: Picture,
+    playerLeftActive :: Picture,
+    playerRight :: Picture,
+    playerRightActive :: Picture,
+    background :: Picture
 }
 
 -- Game Display Mode
 
+winWidth :: Int 
+winWidth = 400
+
+winHeight :: Int 
+winHeight = 600
+
 display :: Display 
-display = InWindow "Lumberjack" (400, 600) (500, 500) 
+display = InWindow "Lumberjack" (winWidth, winHeight) (500, 500) 
 
 -- FPS
 
@@ -30,15 +41,21 @@ fps = 60
 -- Draw world
 
 drawApp :: GameState -> Picture 
-drawApp (GameState s _ _ _ _ img) = img
+drawApp (GameState s _ _ _ LeftSide False pl pla pr pra bg) = Pictures [bg, pl]
+drawApp (GameState s _ _ _ RightSide False pl pla pr pra bg) = Pictures [bg, pr]
+drawApp (GameState s _ _ _ LeftSide True pl pla pr pra bg) = Pictures [bg, pla]
+drawApp (GameState s _ _ _ RightSide True pl pla pr pra bg) = Pictures [bg, pra]
+
 
 -- Handle events
 
 handleEvent :: Event -> GameState -> GameState 
 handleEvent (EventKey (SpecialKey KeyRight) Down _ _) state = 
-    state { score = (score state) + 1}
+    state { curSide = RightSide, active=True}
+handleEvent (EventKey (SpecialKey _) Up _ _) state = 
+    state {active=False}
 handleEvent (EventKey (SpecialKey KeyLeft) Down _ _) state =
-    state {score = (score state) - 1}
+    state { curSide = LeftSide, active=True}
 handleEvent _ state = state
 
 -- Simulation step
@@ -50,6 +67,23 @@ updateApp _ x = x
 main :: IO ()
 main = do
     gen <- newStdGen 
-    player <- loadBMP "assets/player.bmp"
-    let initState = GameState {score=0, alive=True, randomGen=gen, nextBranches=[], curSide=LeftSide, player=player}
-    play display red fps initState drawApp handleEvent updateApp
+    pl <- loadBMP "assets/pl.bmp"
+    pla <- loadBMP "assets/pla.bmp"
+    pr <- loadBMP "assets/pr.bmp"
+    pra <- loadBMP "assets/pra.bmp"
+    bg <- loadBMP "assets/bg.bmp"
+
+    let initState = GameState {
+        score=0, 
+        alive=True, 
+        randomGen=gen, 
+        nextBranches=[], 
+        curSide=LeftSide, 
+        active=False,
+        playerLeft=pl, 
+        playerLeftActive=pla,
+        playerRight=pr,
+        playerRightActive=pra,
+        background=bg
+    }
+    play display (makeColorI 72 219 251 255) fps initState drawApp handleEvent updateApp
