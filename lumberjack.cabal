@@ -4,16 +4,16 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8e6c248787c05c3cf5b6da27a64a900c66a23c8cc8db39f886bc12c18d408ff7
+-- hash: 6b5c18de24689e723b1eac3f3b872bf6e938a03d7bf04823d7d636db218c17fd
 
 name:           lumberjack
 version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/githubuser/lumberjack#readme>
 homepage:       https://github.com/githubuser/lumberjack#readme
 bug-reports:    https://github.com/githubuser/lumberjack/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2021 Author name here
+author:         Alexey Sheshukov
+maintainer:     alexeyshesh@yandex.ru
+copyright:      2021 Alexey Sheshukov
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
