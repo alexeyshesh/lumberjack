@@ -36,6 +36,9 @@ data GameState = GameState {
     assets :: Assets
 }
 
+restart :: GameState -> GameState 
+restart state = state{started=False, score=0, alive=True, time=fullTime}
+
 -- Game Display Mode
 
 winWidth :: Int 
@@ -118,29 +121,20 @@ fullTime = 10
 
 handleEvent :: Event -> GameState -> GameState 
 handleEvent (EventKey (SpecialKey key) Down _ _) state 
-    | not (alive state) && key == KeySpace = state {started=False, score=0, alive=True, time=fullTime}
+    | not (alive state) && key == KeySpace = restart state
     | time state <= 0 || not (alive state) = state {alive = False}
-    | key == KeyRight = state { 
+    | key == KeyRight || key == KeyLeft = state { 
             score = score state + 1,
             time = minimum [time state + 1, fullTime],
             started=True,
-            curSide=RightSide, 
+            curSide=newSide, 
             active=True, 
             nextBranches=fst newBranches,
             randomGen=snd newBranches,
-            alive=head (nextBranches state) /= RightSide
-        }
-    | key == KeyLeft = state { 
-            score = score state + 1,
-            time = minimum [time state + 1, fullTime],
-            started=True,
-            curSide=LeftSide, 
-            active=True,
-            nextBranches=fst newBranches,
-            randomGen=snd newBranches,
-            alive=head (nextBranches state) /= LeftSide
+            alive=head (nextBranches state) /= newSide
         }
     where 
+        newSide = if key == KeyRight then RightSide else LeftSide
         newBranches = branchGenerator (nextBranches state) (randomGen state)
 handleEvent (EventKey (SpecialKey _) Up _ _) state = 
     state {active=False}
