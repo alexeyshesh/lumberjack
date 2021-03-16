@@ -7,7 +7,10 @@ import System.Random
 
 -- Data types 
 
-data Direction = LeftSide | RightSide | Center
+data Direction = LeftSide | 
+                 RightSide | 
+                 Center
+    deriving Eq
 
 data Assets = Assets {
     playerLeft :: Picture,
@@ -16,10 +19,12 @@ data Assets = Assets {
     playerRightActive :: Picture,
     background :: Picture,
     branchLeft :: Picture,
-    branchRight :: Picture
+    branchRight :: Picture,
+    dead :: Picture 
 }
 
 data GameState = GameState { 
+    started :: Bool,
     score :: Int,
     alive :: Bool,
     time :: Float,
@@ -49,17 +54,18 @@ fps = 60
 -- Draw world
 
 drawApp :: GameState -> Picture 
-drawApp (GameState s _ _ _ branches side active assets) = Pictures [bg, player, brs]
+drawApp (GameState _ s alive _ _ branches side active assets) = Pictures [bg, brs, player]
     where 
         bg = background assets
-        player = drawPlayer side active assets
+        player = drawPlayer alive side active assets
         brs = drawBranches branches assets
 
-drawPlayer :: Direction -> Bool -> Assets -> Picture 
-drawPlayer LeftSide False = playerLeft 
-drawPlayer LeftSide True = playerLeftActive 
-drawPlayer RightSide False = playerRight 
-drawPlayer RightSide True = playerRightActive 
+drawPlayer :: Bool -> Direction -> Bool -> Assets -> Picture 
+drawPlayer False _ _ = dead
+drawPlayer _ LeftSide False = playerLeft 
+drawPlayer _ LeftSide True = playerLeftActive 
+drawPlayer _ RightSide False = playerRight 
+drawPlayer _ RightSide True = playerRightActive 
 
 drawBranches :: [Direction] -> Assets -> Picture 
 drawBranches dir assets = Pictures(drawBranchesHelper 0.0 dir assets)
@@ -93,28 +99,33 @@ branchGenerator x gen = (tail x ++ [newBranch], newgen)
         newBranch = [LeftSide, RightSide] !! dir
 
 -- Handle events
+fullTime :: Float 
+fullTime = 20
 
 handleEvent :: Event -> GameState -> GameState 
-handleEvent (EventKey (SpecialKey KeyRight) Down _ _) state = 
-    state { 
-        curSide = RightSide, 
-        active=True, 
-        nextBranches=fst newBranches,
-        randomGen =snd newBranches
-    }
+handleEvent (EventKey (SpecialKey key) Down _ _) state 
+    | not (alive state) && key == KeySpace = state {started=False, score=0, alive=True, time=fullTime}
+    | time state <= 0 || not (alive state) = state {alive = False}
+    | key == KeyRight = state { 
+            started=True,
+            curSide=RightSide, 
+            active=True, 
+            nextBranches=fst newBranches,
+            randomGen=snd newBranches,
+            alive=head (nextBranches state) /= RightSide
+        }
+    | key == KeyLeft = state { 
+            started=True,
+            curSide=LeftSide, 
+            active=True,
+            nextBranches=fst newBranches,
+            randomGen=snd newBranches,
+            alive=head (nextBranches state) /= LeftSide
+        }
     where 
         newBranches = branchGenerator (nextBranches state) (randomGen state)
 handleEvent (EventKey (SpecialKey _) Up _ _) state = 
     state {active=False}
-handleEvent (EventKey (SpecialKey KeyLeft) Down _ _) state =
-    state { 
-        curSide = LeftSide, 
-        active=True,
-        nextBranches=fst newBranches,
-        randomGen =snd newBranches
-    }
-    where 
-        newBranches = branchGenerator (nextBranches state) (randomGen state)
 handleEvent _ state = state
 
 -- Simulation step
@@ -133,11 +144,13 @@ main = do
     bg <- loadBMP "assets/bg.bmp"
     bl <- loadBMP "assets/bl.bmp"
     br <- loadBMP "assets/br.BMP"
+    dead <- loadBMP "assets/dead.bmp"
 
     let initState = GameState {
+        started=False,
         score=0, 
         alive=True, 
-        time = 20,
+        time = fullTime,
         randomGen=gen, 
         nextBranches=defaultBranches, 
         curSide=LeftSide, 
@@ -149,7 +162,8 @@ main = do
             playerRightActive=pra,
             background=bg,
             branchLeft=bl,
-            branchRight=br
+            branchRight=br,
+            dead=dead
         }
     }
     play display black fps initState drawApp handleEvent updateApp
