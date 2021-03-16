@@ -114,13 +114,15 @@ branchGenerator x gen = (tail x ++ [newBranch], newgen)
 
 -- Handle events
 fullTime :: Float 
-fullTime = 20
+fullTime = 10
 
 handleEvent :: Event -> GameState -> GameState 
 handleEvent (EventKey (SpecialKey key) Down _ _) state 
     | not (alive state) && key == KeySpace = state {started=False, score=0, alive=True, time=fullTime}
     | time state <= 0 || not (alive state) = state {alive = False}
     | key == KeyRight = state { 
+            score = score state + 1,
+            time = minimum [time state + 1, fullTime],
             started=True,
             curSide=RightSide, 
             active=True, 
@@ -129,6 +131,8 @@ handleEvent (EventKey (SpecialKey key) Down _ _) state
             alive=head (nextBranches state) /= RightSide
         }
     | key == KeyLeft = state { 
+            score = score state + 1,
+            time = minimum [time state + 1, fullTime],
             started=True,
             curSide=LeftSide, 
             active=True,
@@ -144,8 +148,18 @@ handleEvent _ state = state
 
 -- Simulation step
 
+speedCoef :: Int -> Float
+speedCoef score = 1 + fromIntegral score / 50
+
 updateApp :: Float -> GameState -> GameState
-updateApp _ x = x
+updateApp n state 
+    | alive state && started state = state {
+        time = time state - delta,
+        alive = alive state && time state - delta > 0
+    } 
+    | otherwise = state
+        where 
+            delta = n * speedCoef (score state)
 
 
 main :: IO ()
@@ -164,7 +178,7 @@ main = do
         started=False,
         score=0, 
         alive=True, 
-        time = 10,
+        time = fullTime,
         randomGen=gen, 
         nextBranches=defaultBranches, 
         curSide=LeftSide, 
