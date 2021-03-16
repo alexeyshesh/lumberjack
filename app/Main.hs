@@ -84,18 +84,37 @@ drawTime = undefined
 defaultBranches :: [Direction]
 defaultBranches = [Center, LeftSide, Center, RightSide, Center, RightSide]
 
-branchGenerator :: StdGen -> [Direction] -> GameState
-branchGenerator = undefined 
+branchGenerator :: [Direction] -> StdGen -> ([Direction], StdGen)
+branchGenerator [] gen = (defaultBranches, gen)
+branchGenerator (Center:xs) gen = (xs ++ [Center], gen)
+branchGenerator x gen = (tail x ++ [newBranch], newgen) 
+    where 
+        (dir, newgen) = randomR (0, 1) gen
+        newBranch = [LeftSide, RightSide] !! dir
 
 -- Handle events
 
 handleEvent :: Event -> GameState -> GameState 
 handleEvent (EventKey (SpecialKey KeyRight) Down _ _) state = 
-    state { curSide = RightSide, active=True}
+    state { 
+        curSide = RightSide, 
+        active=True, 
+        nextBranches=fst newBranches,
+        randomGen =snd newBranches
+    }
+    where 
+        newBranches = branchGenerator (nextBranches state) (randomGen state)
 handleEvent (EventKey (SpecialKey _) Up _ _) state = 
     state {active=False}
 handleEvent (EventKey (SpecialKey KeyLeft) Down _ _) state =
-    state { curSide = LeftSide, active=True}
+    state { 
+        curSide = LeftSide, 
+        active=True,
+        nextBranches=fst newBranches,
+        randomGen =snd newBranches
+    }
+    where 
+        newBranches = branchGenerator (nextBranches state) (randomGen state)
 handleEvent _ state = state
 
 -- Simulation step
