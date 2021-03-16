@@ -21,7 +21,8 @@ data Assets = Assets {
     background :: Picture,
     branchLeft :: Picture,
     branchRight :: Picture,
-    dead :: Picture 
+    dead :: Picture,
+    numbers :: [Picture]
 }
 
 data GameState = GameState { 
@@ -64,12 +65,13 @@ branchOffset :: Float
 branchOffset = 60
 
 drawApp :: GameState -> Picture 
-drawApp (GameState _ s alive timeLeft _ branches side active assets) = Pictures [bg, brs, player, timeline]
+drawApp (GameState _ s alive timeLeft _ branches side active assets) = Pictures [bg, brs, player, timeline, scoreImg]
     where 
         bg = background assets
         player = drawPlayer alive side active assets
         brs = drawBranches branches assets
         timeline = drawTime timeLeft
+        scoreImg = drawScore s assets
 
 drawPlayer :: Bool -> Direction -> Bool -> Assets -> Picture 
 drawPlayer False _ _ = dead
@@ -88,10 +90,22 @@ drawBranchesHelper shift (LeftSide:dir) assets =
 drawBranchesHelper shift (RightSide:dir) assets = 
     Translate 0 shift (branchRight assets) : drawBranchesHelper (shift + branchOffset) dir assets
 drawBranchesHelper shift (Center:dir) assets = 
-    drawBranchesHelper (shift + 60) dir assets
+    drawBranchesHelper (shift + branchOffset) dir assets
+
+numberOffset :: Float 
+numberOffset = 40
 
 drawScore :: Int -> Assets -> Picture 
-drawScore = undefined
+drawScore score assets = Pictures(drawScoreHelper 0 (toDigits score) assets)
+
+drawScoreHelper :: Float -> [Int] -> Assets -> [Picture]
+drawScoreHelper _ [] _ = []
+drawScoreHelper shift (n:ntail) assets = 
+    Translate shift (-10) (numbers assets !! n) : drawScoreHelper (shift + numberOffset) ntail assets
+
+toDigits :: Int -> [Int]
+toDigits 0 = []
+toDigits n = toDigits(n `div` 10) ++ [n `mod` 10]
 
 drawTime :: Float -> Picture 
 drawTime timeLeft = Pictures [bg, timeLeftLine]
@@ -143,7 +157,7 @@ handleEvent _ state = state
 -- Simulation step
 
 speedCoef :: Int -> Float
-speedCoef score = 1 + fromIntegral score / 50
+speedCoef score = 1 + fromIntegral score / 40
 
 updateApp :: Float -> GameState -> GameState
 updateApp n state 
@@ -168,6 +182,18 @@ main = do
     br <- loadBMP "assets/br.BMP"
     dead <- loadBMP "assets/dead.bmp"
 
+    n0 <- loadBMP "assets/0.bmp"
+    n1 <- loadBMP "assets/1.bmp"
+    n2 <- loadBMP "assets/2.bmp"
+    n3 <- loadBMP "assets/3.bmp"
+    n4 <- loadBMP "assets/4.bmp"
+    n5 <- loadBMP "assets/5.bmp"
+    n6 <- loadBMP "assets/6.bmp"
+    n7 <- loadBMP "assets/7.bmp"
+    n8 <- loadBMP "assets/8.bmp"
+    n9 <- loadBMP "assets/9.bmp"
+
+
     let initState = GameState {
         started=False,
         score=0, 
@@ -185,7 +211,8 @@ main = do
             background=bg,
             branchLeft=bl,
             branchRight=br,
-            dead=dead
+            dead=dead,
+            numbers=[n0, n1, n2, n3, n4, n5, n6, n7, n8, n9]
         }
     }
     play display black fps initState drawApp handleEvent updateApp
