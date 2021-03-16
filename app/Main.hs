@@ -2,6 +2,7 @@ module Main where
 
 import Graphics.Gloss.Interface.Pure.Game 
 import Graphics.Gloss.Data.Bitmap
+import Graphics.Gloss.Data.Picture
 import System.Random 
 
 
@@ -53,12 +54,19 @@ fps = 60
 
 -- Draw world
 
+timelineHeight :: Float 
+timelineHeight = 10
+
+branchOffset :: Float 
+branchOffset = 60
+
 drawApp :: GameState -> Picture 
-drawApp (GameState _ s alive _ _ branches side active assets) = Pictures [bg, brs, player]
+drawApp (GameState _ s alive timeLeft _ branches side active assets) = Pictures [bg, brs, player, timeline]
     where 
         bg = background assets
         player = drawPlayer alive side active assets
         brs = drawBranches branches assets
+        timeline = drawTime timeLeft
 
 drawPlayer :: Bool -> Direction -> Bool -> Assets -> Picture 
 drawPlayer False _ _ = dead
@@ -73,9 +81,9 @@ drawBranches dir assets = Pictures(drawBranchesHelper 0.0 dir assets)
 drawBranchesHelper :: Float -> [Direction] -> Assets -> [Picture]
 drawBranchesHelper _ [] _ = []
 drawBranchesHelper shift (LeftSide:dir) assets = 
-    Translate 0 shift (branchLeft assets) : drawBranchesHelper (shift + 60) dir assets
+    Translate 0 shift (branchLeft assets) : drawBranchesHelper (shift + branchOffset) dir assets
 drawBranchesHelper shift (RightSide:dir) assets = 
-    Translate 0 shift (branchRight assets) : drawBranchesHelper (shift + 60) dir assets
+    Translate 0 shift (branchRight assets) : drawBranchesHelper (shift + branchOffset) dir assets
 drawBranchesHelper shift (Center:dir) assets = 
     drawBranchesHelper (shift + 60) dir assets
 
@@ -83,7 +91,13 @@ drawScore :: Int -> Assets -> Picture
 drawScore = undefined
 
 drawTime :: Float -> Picture 
-drawTime = undefined
+drawTime timeLeft = Pictures [bg, timeLeftLine]
+    where
+        width = fromIntegral winWidth * (timeLeft / fullTime)
+        verticalOffset = fromIntegral winHeight / 2 - timelineHeight / 2
+        horizontalOffset = - fromIntegral winWidth / 2 + width / 2
+        bg = Translate 0 verticalOffset $ color black $ rectangleSolid (fromIntegral winWidth) timelineHeight
+        timeLeftLine = Translate horizontalOffset verticalOffset $ color green $ rectangleSolid width timelineHeight
 
 -- World generator 
 
@@ -150,7 +164,7 @@ main = do
         started=False,
         score=0, 
         alive=True, 
-        time = fullTime,
+        time = 10,
         randomGen=gen, 
         nextBranches=defaultBranches, 
         curSide=LeftSide, 
