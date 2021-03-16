@@ -22,7 +22,8 @@ data Assets = Assets {
     branchLeft :: Picture,
     branchRight :: Picture,
     dead :: Picture,
-    numbers :: [Picture]
+    numbers :: [Picture],
+    startScreen :: Picture
 }
 
 data GameState = GameState { 
@@ -65,20 +66,21 @@ branchOffset :: Float
 branchOffset = 60
 
 drawApp :: GameState -> Picture 
-drawApp (GameState _ s alive timeLeft _ branches side active assets) = Pictures [bg, brs, player, timeline, scoreImg]
+drawApp (GameState started s alive timeLeft _ branches side active assets) = Pictures [bg, brs, player, timeline, scoreImg]
     where 
         bg = background assets
-        player = drawPlayer alive side active assets
+        player = drawPlayer started alive side active assets
         brs = drawBranches branches assets
         timeline = drawTime timeLeft
         scoreImg = drawScore s assets
 
-drawPlayer :: Bool -> Direction -> Bool -> Assets -> Picture 
-drawPlayer False _ _ = dead
-drawPlayer _ LeftSide False = playerLeft 
-drawPlayer _ LeftSide True = playerLeftActive 
-drawPlayer _ RightSide False = playerRight 
-drawPlayer _ RightSide True = playerRightActive 
+drawPlayer :: Bool -> Bool -> Direction -> Bool -> Assets -> Picture 
+drawPlayer _ False _ _ assets = dead assets
+drawPlayer False _ _ _ assets = Pictures [startScreen assets, playerRight assets]
+drawPlayer _ _ LeftSide False assets = playerLeft assets
+drawPlayer _ _ LeftSide True assets = playerLeftActive assets
+drawPlayer _ _ RightSide False assets = playerRight assets
+drawPlayer _ _ RightSide True assets = playerRightActive assets
 
 drawBranches :: [Direction] -> Assets -> Picture 
 drawBranches dir assets = Pictures(drawBranchesHelper 0.0 dir assets)
@@ -107,6 +109,11 @@ toDigits :: Int -> [Int]
 toDigits 0 = []
 toDigits n = toDigits(n `div` 10) ++ [n `mod` 10]
 
+timeColor :: Float -> Color 
+timeColor time 
+    | time > 5 = green 
+    | otherwise = red
+
 drawTime :: Float -> Picture 
 drawTime timeLeft = Pictures [bg, timeLeftLine]
     where
@@ -114,7 +121,7 @@ drawTime timeLeft = Pictures [bg, timeLeftLine]
         verticalOffset = fromIntegral winHeight / 2 - timelineHeight / 2
         horizontalOffset = - fromIntegral winWidth / 2 + width / 2
         bg = Translate 0 verticalOffset $ color black $ rectangleSolid (fromIntegral winWidth) timelineHeight
-        timeLeftLine = Translate horizontalOffset verticalOffset $ color green $ rectangleSolid width timelineHeight
+        timeLeftLine = Translate horizontalOffset verticalOffset $ color (timeColor timeLeft) $ rectangleSolid width timelineHeight
 
 -- World generator 
 
@@ -181,6 +188,7 @@ main = do
     bl <- loadBMP "assets/bl.bmp"
     br <- loadBMP "assets/br.BMP"
     dead <- loadBMP "assets/dead.bmp"
+    startScreen <- loadBMP "assets/start_screen.bmp"
 
     n0 <- loadBMP "assets/0.bmp"
     n1 <- loadBMP "assets/1.bmp"
@@ -212,7 +220,8 @@ main = do
             branchLeft=bl,
             branchRight=br,
             dead=dead,
-            numbers=[n0, n1, n2, n3, n4, n5, n6, n7, n8, n9]
+            numbers=[n0, n1, n2, n3, n4, n5, n6, n7, n8, n9],
+            startScreen=startScreen
         }
     }
     play display black fps initState drawApp handleEvent updateApp
