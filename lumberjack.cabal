@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6b5c18de24689e723b1eac3f3b872bf6e938a03d7bf04823d7d636db218c17fd
+-- hash: 29d06f02d943d9a640758e06abeccafc019914a6077aa673af55bb85698501be
 
 name:           lumberjack
 version:        0.1.0.0
@@ -35,6 +35,7 @@ library
   build-depends:
       base >=4.7 && <5
     , gloss
+    , gloss-juicy
     , random
   default-language: Haskell2010
 
@@ -48,6 +49,7 @@ executable lumberjack-exe
   build-depends:
       base >=4.7 && <5
     , gloss
+    , gloss-juicy
     , lumberjack
     , random
   default-language: Haskell2010
@@ -63,6 +65,7 @@ test-suite lumberjack-test
   build-depends:
       base >=4.7 && <5
     , gloss
+    , gloss-juicy
     , lumberjack
     , random
   default-language: Haskell2010

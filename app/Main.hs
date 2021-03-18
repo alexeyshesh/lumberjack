@@ -142,12 +142,12 @@ fullTime :: Float
 fullTime = 10
 
 handleEvent :: Event -> GameState -> GameState 
-handleEvent (EventKey (SpecialKey key) Down _ _) state 
+handleEvent (EventKey (SpecialKey key) Down _ _) state
     | not (alive state) && key == KeySpace = restart state
     | time state <= 0 || not (alive state) = state {alive = False}
     | key == KeyRight || key == KeyLeft = state { 
             score = score state + 1,
-            time = minimum [time state + 1, fullTime],
+            time = min (time state + 1) fullTime,
             started=True,
             curSide=newSide, 
             active=True, 
@@ -174,8 +174,8 @@ updateApp n state
         alive = alive state && time state - delta > 0
     } 
     | otherwise = state
-        where 
-            delta = n * speedCoef (score state)
+    where 
+        delta = n * speedCoef (score state)
 
 -- loadBMP Exception handling
 
@@ -258,9 +258,6 @@ loadAssets = do
                                                                                                                         numbers=[n0, n1, n2, n3, n4, n5, n6, n7, n8, n9],
                                                                                                                         startScreen=startScreen
                                                                                                                 }
-    
-
-
 
 main :: IO ()
 main = do
