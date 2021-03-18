@@ -1,6 +1,6 @@
 name:                lumberjack
 version:             0.1.0.0
-github:              "githubuser/lumberjack"
+github:              "https://github.com/alexeyshesh/lumberjack"
 license:             BSD3
 author:              "Alexey Sheshukov"
 maintainer:          "alexeyshesh@yandex.ru"
@@ -17,7 +17,7 @@ extra-source-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/githubuser/lumberjack#readme>
+description:         Please see the README on GitHub at <https://github.com/alexeyshesh/lumberjack#readme>
 
 dependencies:
 - base >= 4.7 && < 5
