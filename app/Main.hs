@@ -194,7 +194,7 @@ loadAssets = do
     pra <- loadImage "assets/pra.bmp"
     bg <- loadImage "assets/bg.bmp"
     bl <- loadImage "assets/bl.bmp"
-    br <- loadImage "assets/br.BMP"
+    br <- loadImage "assets/br.bmp"
     dead <- loadImage "assets/dead.bmp"
     startScreen <- loadImage "assets/start_screen.bmp"
     n0 <- loadImage "assets/0.bmp"
@@ -207,57 +207,35 @@ loadAssets = do
     n7 <- loadImage "assets/7.bmp"
     n8 <- loadImage "assets/8.bmp"
     n9 <- loadImage "assets/9.bmp"
+
+    let loaded = sequence [pl, pla, pr, pra, bg, bl, br, dead, startScreen, n0, n1, n2, n3, n4, n5, n6, n7, n8, n9]
+    case loaded of 
+        Nothing -> return Nothing 
+        Just pics -> return $ Just Assets {
+            playerLeft=pics !! 0,
+            playerLeftActive=pics !! 1,
+            playerRight=pics !! 2,
+            playerRightActive=pics !! 3,
+            background=pics !! 4,
+            branchLeft=pics !! 5,
+            branchRight=pics !! 6,
+            dead=pics !! 7,
+            startScreen=pics !! 8,
+            numbers=[
+                pics !! 9,
+                pics !! 10,
+                pics !! 11,
+                pics !! 12,
+                pics !! 13,
+                pics !! 14,
+                pics !! 15,
+                pics !! 16,
+                pics !! 17,
+                pics !! 18
+            ]
+        }
+
     
-    case pl of 
-        Nothing -> return Nothing
-        Just pl -> case pla of 
-            Nothing -> return Nothing
-            Just pla -> case pr of 
-                Nothing -> return Nothing
-                Just pr -> case pra of 
-                    Nothing -> return Nothing
-                    Just pra -> case bg of 
-                        Nothing -> return Nothing
-                        Just bg -> case bl of  
-                            Nothing -> return Nothing
-                            Just bl -> case br of 
-                                Nothing -> return Nothing
-                                Just br -> case dead of 
-                                    Nothing -> return Nothing
-                                    Just dead -> case n0 of
-                                        Nothing -> return Nothing
-                                        Just n0 -> case n1 of  
-                                            Nothing -> return Nothing
-                                            Just n1 -> case n2 of  
-                                                Nothing -> return Nothing
-                                                Just n2 -> case n3 of  
-                                                    Nothing -> return Nothing
-                                                    Just n3 -> case n4 of  
-                                                        Nothing -> return Nothing
-                                                        Just n4 -> case n5 of  
-                                                            Nothing -> return Nothing
-                                                            Just n5 -> case n6 of  
-                                                                Nothing -> return Nothing
-                                                                Just n6 -> case n7 of  
-                                                                    Nothing -> return Nothing
-                                                                    Just n7 -> case n8 of  
-                                                                        Nothing -> return Nothing
-                                                                        Just n8 -> case n9 of  
-                                                                            Nothing -> return Nothing
-                                                                            Just n9 -> case startScreen of  
-                                                                                Nothing -> return Nothing
-                                                                                Just startScreen -> return $ Just Assets {
-                                                                                                                        playerLeft=pl, 
-                                                                                                                        playerLeftActive=pla,
-                                                                                                                        playerRight=pr,
-                                                                                                                        playerRightActive=pra,
-                                                                                                                        background=bg,
-                                                                                                                        branchLeft=bl,
-                                                                                                                        branchRight=br,
-                                                                                                                        dead=dead,
-                                                                                                                        numbers=[n0, n1, n2, n3, n4, n5, n6, n7, n8, n9],
-                                                                                                                        startScreen=startScreen
-                                                                                                                }
 
 main :: IO ()
 main = do
@@ -270,7 +248,7 @@ main = do
                 started=False,
                 score=0, 
                 alive=True, 
-                time = fullTime,
+                time=fullTime,
                 randomGen=gen, 
                 nextBranches=defaultBranches, 
                 curSide=LeftSide, 
