@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 29d06f02d943d9a640758e06abeccafc019914a6077aa673af55bb85698501be
+-- hash: 30ad4ce6346058340cf3c6f09323e9e0feb85cbd7d98b197b8cde60b8e85c115
 
 name:           lumberjack
 version:        0.1.0.0
@@ -27,7 +27,14 @@ source-repository head
 
 library
   exposed-modules:
+      AppConfig
+      DataTypes
+      DrawApp
+      EventHandler
+      Generator
+      ImageLoader
       Lib
+      Simulation
   other-modules:
       Paths_lumberjack
   hs-source-dirs:
