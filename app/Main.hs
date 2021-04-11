@@ -242,7 +242,7 @@ main = do
     gen <- newStdGen 
     assets <- loadAssets
     case assets of 
-        Nothing -> putStr "Error: can not load some images, check assets directory"
+        Nothing -> putStrLn "Error: can not load some images, check assets directory"
         Just assets -> do
             let initState = GameState {
                 started=False,
