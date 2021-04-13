@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6b5c18de24689e723b1eac3f3b872bf6e938a03d7bf04823d7d636db218c17fd
+-- hash: 30ad4ce6346058340cf3c6f09323e9e0feb85cbd7d98b197b8cde60b8e85c115
 
 name:           lumberjack
 version:        0.1.0.0
@@ -27,7 +27,14 @@ source-repository head
 
 library
   exposed-modules:
+      AppConfig
+      DataTypes
+      DrawApp
+      EventHandler
+      Generator
+      ImageLoader
       Lib
+      Simulation
   other-modules:
       Paths_lumberjack
   hs-source-dirs:
@@ -35,6 +42,7 @@ library
   build-depends:
       base >=4.7 && <5
     , gloss
+    , gloss-juicy
     , random
   default-language: Haskell2010
 
@@ -48,6 +56,7 @@ executable lumberjack-exe
   build-depends:
       base >=4.7 && <5
     , gloss
+    , gloss-juicy
     , lumberjack
     , random
   default-language: Haskell2010
@@ -63,6 +72,7 @@ test-suite lumberjack-test
   build-depends:
       base >=4.7 && <5
     , gloss
+    , gloss-juicy
     , lumberjack
     , random
   default-language: Haskell2010
